@@ -27,6 +27,7 @@ DICT ={
 
 total = 0
 total_aces = 0
+bot_total_aces = 0
 player_wins = 0
 bot_wins = 0
 bot_total = 0
@@ -37,17 +38,65 @@ def draw_a_card():
     response = requests.get(f'https://deckofcardsapi.com/api/deck/{deck_id}/draw/?count=1').json()
     return response['cards'][0]
 
-def check_result():
-    global total, player_wins, bot_wins
-
-
-
 def bot_plays(update, context):
-    global bot_total, total, player_wins, bot_wins
+    """Ход бота, а также подсчет результатов"""
+    global bot_total, total, player_wins, bot_wins, bot_first_card_value, bot_total_aces
     chat = update.effective_chat
+    check_win = False
+    button = ReplyKeyboardMarkup([['/start', '/rules']], resize_keyboard=True)
     context.bot.send_message(chat_id=chat.id, text=f'Твои очки: {total}. Моя очередь!')
+    context.bot.send_message(chat_id=chat.id, text=f'Напомню, у меня было {bot_first_card_value}!')
+    bot_total = bot_first_card_value
+    while bot_total < 17:
+        card = draw_a_card()
+        card_pic = card['image']
+        context.bot.send_photo(chat.id, card_pic)
+        if not card['value'] == 'ACE':
+            bot_total += DICT[card['value']]
+        else:
+            if (bot_total + 11) > 21:
+                bot_total += 1
+            else:
+                bot_total += 11
+                bot_total_aces += 1
+        while bot_total_aces > 0 and bot_total > 21:
+            bot_total -= 10
+            bot_total_aces -= 1
+        if bot_total > 21:
+            player_wins += 1
+            context.bot.send_message(chat_id=chat.id, text=f'У меня {bot_total} очков.')
+            context.bot.send_message(chat_id=chat.id, text=f'У меня перебор. В этот раз тебе повезло.')
+            context.bot.send_message(chat_id=chat.id, text=f'Вы - {player_wins}. Бот - {bot_wins}.', reply_markup=button)
+            check_win = True
+        elif bot_total == 21:
+            player_wins += 1
+            context.bot.send_message(chat_id=chat.id, text=f'У меня {bot_total} очков.')
+            context.bot.send_message(chat_id=chat.id, text=f'Чистая победа!')
+            context.bot.send_message(chat_id=chat.id, text=f'Вы - {player_wins}. Бот - {bot_wins}.', reply_markup=button)
+            check_win = True
+        elif bot_total >= 17 and bot_total < 21:
+            context.bot.send_message(chat_id=chat.id, 
+                                    text=f'У меня {bot_total}, останавливаюсь.')
+        else:
+            context.bot.send_message(chat_id=chat.id, 
+                                    text=f'У меня {bot_total}, продолжаем!')
+    if not check_win:
+        context.bot.send_message(chat_id=chat.id, text=f'Итоговый счет: {total} у тебя, {bot_total} у меня.')
+        if bot_total <= total:
+            player_wins += 1
+            context.bot.send_message(chat_id=chat.id, text=f'Поздравляю, победа за тобой!')
+            context.bot.send_message(chat_id=chat.id, text=f'Вы - {player_wins}. Бот - {bot_wins}.', reply_markup=button)                
+        else:
+            bot_wins += 1
+            context.bot.send_message(chat_id=chat.id, text=f'И... я победил!')
+            context.bot.send_message(chat_id=chat.id, text=f'Вы - {player_wins}. Бот - {bot_wins}.', reply_markup=button)  
 
 def wellcome(update, context):
+    """Запуск игры, взятие первой карты ботом."""
+    global total, bot_total, bot_first_card_value, total_aces, bot_total_aces
+    total = 0
+    total_aces = 0
+    bot_total = 0
     chat = update.effective_chat
     name = update.message.chat.first_name
     button = ReplyKeyboardMarkup([['/draw', '/rules']], resize_keyboard=True)
@@ -60,16 +109,15 @@ def wellcome(update, context):
     context.bot.send_photo(chat.id, card_pic)
     if card['value'] == 'ACE':
         bot_first_card_value = 11
+        bot_total_aces += 1
     else:
         bot_first_card_value = DICT[card['value']]
     context.bot.send_message(chat_id=chat.id, text=f'И так, у меня {bot_first_card_value}. Твой черед!') 
 
-
-
-
 def lets_play(update, context):
     global total, total_aces, player_wins, bot_wins
     chat = update.effective_chat
+    button = ReplyKeyboardMarkup([['/start', '/rules']], resize_keyboard=True)
     card = draw_a_card()
     card_pic = card['image']
     context.bot.send_photo(chat.id, card_pic)
@@ -90,14 +138,15 @@ def lets_play(update, context):
         bot_wins += 1
         context.bot.send_message(chat_id=chat.id, text=f'Общее число очков: {total}')
         context.bot.send_message(chat_id=chat.id, text=f'Вы проиграли! Повезет в другой раз, возможно.')
-        context.bot.send_message(chat_id=chat.id, text=f'Вы - {player_wins}. Бот - {bot_wins}.')
+        context.bot.send_message(chat_id=chat.id, text=f'Вы - {player_wins}. Бот - {bot_wins}.', reply_markup=button)
         total = 0
     elif total == 21:
         player_wins += 1
         context.bot.send_message(chat_id=chat.id, text=f'Общее число очков: {total}')
         context.bot.send_message(chat_id=chat.id, text=f'Поздравляю! Победа Ваша!')
-        context.bot.send_message(chat_id=chat.id, text=f'Вы - {player_wins}. Бот - {bot_wins}.')
+        context.bot.send_message(chat_id=chat.id, text=f'Вы - {player_wins}. Бот - {bot_wins}.', reply_markup=button)
         total = 0
+        
     else:
         button = ReplyKeyboardMarkup([['/draw', '/stop']], resize_keyboard=True)
         context.bot.send_message(chat_id=chat.id, 
@@ -109,7 +158,6 @@ def lets_play(update, context):
 def main():
     updater = Updater(token=auth_token)
   
-
     updater.dispatcher.add_handler(CommandHandler('draw', lets_play))
     updater.dispatcher.add_handler(CommandHandler('start', wellcome))
     updater.dispatcher.add_handler(CommandHandler('stop', bot_plays))
