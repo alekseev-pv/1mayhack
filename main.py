@@ -1,3 +1,4 @@
+from curses import echo
 from telegram.ext import Updater, Filters, MessageHandler, CommandHandler
 from telegram import ReplyKeyboardMarkup
 from common_func import * 
@@ -44,7 +45,7 @@ def main():
    
     updater.dispatcher.add_handler(CommandHandler('start', wake_up))
     updater.dispatcher.add_handler(CommandHandler('newrecipe', new_recipe))
-    # updater.dispatcher.add_handler(MessageHandler(Filters.text, say_hi))
+    updater.dispatcher.add_handler(MessageHandler(Filters.text, echo))
     updater.start_polling(poll_interval=20.0)
     updater.idle()
 
