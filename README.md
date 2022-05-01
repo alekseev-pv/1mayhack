@@ -1,6 +1,6 @@
 **Мир! Труд! Хакатон!**
 
-@StBlackJack_bot
+Сыграем в блэкджек!? @StBlackJack_bot
 
 TODO:
 

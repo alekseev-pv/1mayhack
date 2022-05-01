@@ -1,4 +1,5 @@
 import codecs
+import json
 import requests
 import os
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
@@ -27,17 +28,13 @@ DICT = {
     'KING': 10,
 }
 
-user_dict = {
-    215680037: {
-        'total': 0,
-        'total_aces':  0,
-        'bot_total_aces': 0,
-        'player_wins': 0,
-        'bot_wins': 0,
-        'bot_total': 0,
-        'bot_first_card_value': 0,
-    }
-}
+user_dict = {}
+
+
+def save_progress(user_dict):
+    """Сохраняем прогресс в файл"""
+    with open('user_dict.json', 'w', encoding='utf-8') as file:
+        json.dump(user_dict, file)
 
 
 def read_user_dict(user_dict, chat_id, key):
@@ -158,6 +155,7 @@ def bot_plays(update, context):
                     chat_id=chat.id,
                     key='player_wins',
                     value=player_wins)
+    save_progress(user_dict=user_dict)
 
 
 def wellcome(update, context):
@@ -194,6 +192,7 @@ def wellcome(update, context):
                     chat_id=chat.id,
                     key='bot_total_aces',
                     value=bot_total_aces)
+    save_progress(user_dict=user_dict)
 
 
 def lets_play(update, context):
@@ -262,6 +261,7 @@ def lets_play(update, context):
                     chat_id=chat.id,
                     key='player_wins',
                     value=player_wins)
+    save_progress(user_dict=user_dict)
 
 
 def talk(update, context):
@@ -279,9 +279,15 @@ def rules(update, context):
     button = ReplyKeyboardMarkup([['/start', '/rules']], resize_keyboard=True)
     for str in text:
         context.bot.send_message(chat_id=chat.id, text=str, reply_markup=button)
-                        
+
 
 def main():
+    global user_dict
+    try:
+        with open('user_dict.json') as file:
+            user_dict = json.load(file)
+    except Exception:
+        print('Невозможно загрузить словарь.')
     updater = Updater(token=auth_token)
 
     updater.dispatcher.add_handler(CommandHandler('draw', lets_play))
