@@ -5,19 +5,20 @@ from telegram import ReplyKeyboardMarkup
 import logging
 import requests
 from pprint import pprint
+import urllib.parse
+
+from bs4 import BeautifulSoup
 
 import os
 from dotenv import load_dotenv
-
 
 load_dotenv()
 
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 URL_YANDEX_IMAGE = 'https://yandex.ru/images/search?source=collections' \
-                      '&rpt=imageview&url=urltofile&'
-
-
+                   '&rpt=imageview&url=urltofile&'
+COUNT_OUTPUT_IMAGES = 3
 
 
 def send_message(bot, message):
@@ -28,24 +29,27 @@ def send_message(bot, message):
     except Exception as error:
         logging.error(f'Сбой в работе бота телеги: {error}')
 
+
 def get_new_text():
     return f'Просто новый текст'
 
+
 def new_text(update, context):
     chat = update.effective_chat
-    #print(update.message)
+    # print(update.message)
     text = update.message.text
     context.bot.send_message(chat.id, f'Был отправлен текст {text}')
 
+
 def get_new_image():
     return f'Просто новый текст'
+
 
 def new_image(update, context):
     chat = update.effective_chat
     image = update.message.photo[0]
     context.bot.send_message(chat.id, 'Возвращаем вам ваше изображение')
     context.bot.send_photo(chat.id, image)
-
 
 
 def wake_up(update, context):
@@ -58,6 +62,31 @@ def wake_up(update, context):
         text=f'Привет, {name}. Посмотри на текст, которого я для тебя нашел',
         reply_markup=button
     )
+
+
+def get_yandex_inf():
+    url_image = 'https://teatrzoo.ru/wp-content/uploads/2019/10/kak-krichat-lebedi_39.jpg'
+    url = f'https://yandex.ru/images/search?source=collections&rpt=imageview' \
+          f'&url={url_image}'
+    soup = BeautifulSoup(requests.get(url).text, 'lxml')
+    similar = soup.find_all('div', class_='CbirSimilar-Thumb')
+
+    for i in similar:
+        str_ish = f"{i.find('a').get('href')}\n"
+        str_edit = change_str_to_url(str_ish)
+        print(str_edit)
+
+
+def change_str_to_url(string: str):
+    end_index = string.find('&rpt=')
+    new_string = string[:end_index]
+    begin_index = new_string.find('img_url') + 8
+    newest_string = new_string[begin_index:]
+
+    parsed_string = urllib.parse.unquote_plus(newest_string)
+    return parsed_string
+
+
 
 def main():
     updater = Updater(token=TELEGRAM_TOKEN)
@@ -72,5 +101,5 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
-
+    # main()
+    get_yandex_inf()
