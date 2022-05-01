@@ -25,3 +25,17 @@ Add a bot to your telegram account:
 [tap here](https://web.telegram.org/z/#5273144217)
 
 Send a single word in both ru or eng to bot. Enjoy!
+
+### Todo
+- Code refactoring
+- Code refactoring
+- More code refactoring
+- Add buttons
+- Make bot more interactive with buttons
+- Add more info for eng words fo en-ru translations
+- Add more languages
+
+### Thanks to
+- My wife Anastasia for being patient
+- My friend Alex for being interested in whatever i was doing during my work
+- My doggo Judy. She tought to give her paw the day i ended the project
