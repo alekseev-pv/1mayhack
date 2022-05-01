@@ -1,6 +1,5 @@
-from curses import echo
-from telegram.ext import Updater, Filters, MessageHandler, CommandHandler
-from telegram import ReplyKeyboardMarkup
+from telegram.ext import Updater, Filters, MessageHandler, CommandHandler, CallbackContext
+from telegram import ReplyKeyboardMarkup, Update
 from common_func import * 
 from dotenv import load_dotenv
 import requests
@@ -45,7 +44,7 @@ def main():
    
     updater.dispatcher.add_handler(CommandHandler('start', wake_up))
     updater.dispatcher.add_handler(CommandHandler('newrecipe', new_recipe))
-    updater.dispatcher.add_handler(MessageHandler(Filters.text, echo))
+    # updater.dispatcher.add_handler(MessageHandler(Filters.text, get_recipe_from_ingredient('chicken')))
     updater.start_polling(poll_interval=20.0)
     updater.idle()
 
