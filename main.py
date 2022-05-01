@@ -24,7 +24,6 @@ def get_new_image():
         print(error)
         new_url = another_url
         response = requests.get(new_url)
-
     response = response.json()
     return response.get('url')
 
@@ -45,7 +44,6 @@ def hello_user(update, context):
         text='Hi, {}. Picture day by NASA'.format(name),
         reply_markup=button
     )
-
     context.bot.send_photo(chat.id, get_new_image())
     context.bot.send_message(chat.id, get_day_expln())
 
