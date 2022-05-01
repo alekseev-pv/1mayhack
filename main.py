@@ -18,12 +18,12 @@ TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 URL_YANDEX_IMAGE = 'https://yandex.ru/images/search?source=collections' \
                    '&rpt=imageview&url=urltofile&'
-THUMBSNAP_API_KEY = os.getenv('THUMBSNAP_API_KEY') # https://thumbsnap.com/api
+THUMBSNAP_API_KEY = os.getenv('THUMBSNAP_API_KEY')  # https://thumbsnap.com/api
 THUMBSNAP_URL = 'https://thumbsnap.com/api/upload'
 
 COUNT_OUTPUT_IMAGES = 3
 TEST_URL_IMAGE = 'https://teatrzoo.ru/wp-content/uploads/2019/10' \
-                          '/kak-krichat-lebedi_39.jpg'
+                 '/kak-krichat-lebedi_39.jpg'
 
 
 def send_message(bot, message):
@@ -52,9 +52,12 @@ def get_new_image():
 
 def new_image(update, context):
     chat = update.effective_chat
-    image = update.message.photo[0]
-    context.bot.send_message(chat.id, 'Возвращаем вам ваше изображение')
-    context.bot.send_photo(chat.id, image)
+    # image = update.message.photo[0]
+    # context.bot.send_message(chat.id, 'Возвращаем вам ваше изображение')
+    # image = get_yandex_inf(TEST_URL_IMAGE)[0]
+    for i in get_yandex_inf(TEST_URL_IMAGE):
+        #print(i)
+        context.bot.send_photo(chat.id, i)
 
 
 def wake_up(update, context):
@@ -81,7 +84,7 @@ def get_yandex_inf(url_image):
         str_edit = change_str_to_url(str_ish)
         all_string.append(str_edit)
         # print(str_edit)
-    #pprint(all_string)
+    # pprint(all_string)
     return all_string
 
 
@@ -93,8 +96,10 @@ def change_str_to_url(string: str):
     parsed_string = urllib.parse.unquote_plus(newest_string)
     return parsed_string
 
+
 def push_image_web():
     pass
+
 
 def main():
     updater = Updater(token=TELEGRAM_TOKEN)
@@ -109,5 +114,5 @@ def main():
 
 
 if __name__ == '__main__':
-    #main()
-    get_yandex_inf(TEST_URL_IMAGE)
+    main()
+    # get_yandex_inf(TEST_URL_IMAGE)
