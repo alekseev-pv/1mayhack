@@ -41,7 +41,6 @@ def get_new_text():
 
 def new_text(update, context):
     chat = update.effective_chat
-    # print(update.message)
     text = update.message.text
     context.bot.send_message(chat.id, f'Был отправлен текст {text}')
 
@@ -52,11 +51,8 @@ def get_new_image():
 
 def new_image(update, context):
     chat = update.effective_chat
-    # image = update.message.photo[0]
-    # context.bot.send_message(chat.id, 'Возвращаем вам ваше изображение')
-    # image = get_yandex_inf(TEST_URL_IMAGE)[0]
     for i in get_yandex_inf(TEST_URL_IMAGE):
-        #print(i)
+        # print(i)
         context.bot.send_photo(chat.id, i)
 
 
@@ -67,7 +63,7 @@ def wake_up(update, context):
 
     context.bot.send_message(
         chat_id=chat.id,
-        text=f'Привет, {name}. Посмотри на текст, которого я для тебя нашел',
+        text=f'Привет, {name}. Посмотри на текст, который я для тебя нашел',
         reply_markup=button
     )
 
@@ -83,8 +79,7 @@ def get_yandex_inf(url_image):
         str_ish = f"{i.find('a').get('href')}\n"
         str_edit = change_str_to_url(str_ish)
         all_string.append(str_edit)
-        # print(str_edit)
-    # pprint(all_string)
+
     return all_string
 
 
@@ -115,4 +110,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-    # get_yandex_inf(TEST_URL_IMAGE)
