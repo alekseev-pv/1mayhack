@@ -115,7 +115,11 @@ def weather_by_text(update, context):
             'Должно быть два числа.'
         )
         return
-    lat, lon = float(coords[0]), float(coords[1])
+    try:
+        lat, lon = float(coords[0]), float(coords[1])
+    except ValueError:
+        send_message(context.bot, 'Что-то пошло не так.')
+        return
     if not -90 <= lat <= 90:
         send_message(
             context.bot,
