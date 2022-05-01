@@ -1,17 +1,31 @@
-# This is a sample Python script.
+import telegram
+from telegram.ext import Updater
+import logging
+import requests
 
-# Press ⌃R to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
-
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press ⌘F8 to toggle the breakpoint.
+import os
+from dotenv import load_dotenv
 
 
-# Press the green button in the gutter to run the script.
+load_dotenv()
+
+TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
+TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
+ENDPOIT_YANDEX_IMAGE = 'https://yandex.ru/images/search?source=collections' \
+                      '&rpt=imageview&url=urltofile&'
+
+
+bot = telegram.Bot(token=TELEGRAM_TOKEN)
+
+
+def send_message(bot, message):
+    """Отправляем сообщение в Telegram чат."""
+    try:
+        bot.send_message(TELEGRAM_CHAT_ID, message)
+        logging.info(f'Бот телеги отправил сообщение {message} ')
+    except Exception as error:
+        logging.error(f'Сбой в работе бота телеги: {error}')
+
 if __name__ == '__main__':
-    print_hi('Initial 1mayhack')
+    send_message(bot, f'Отправка первого сообщения из программы')
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
-# первый коммент и пуш из пайчарма
