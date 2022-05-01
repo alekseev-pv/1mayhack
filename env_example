@@ -1,0 +1,12 @@
+TOKEN = ''
+APPID_EDAMAM = ''
+TOKEN_EDAMAM = ''
+TOKEN_YNX = ''
+FOLDER_ID = ''
+
+
+
+# В этом файле может быть несколько переменных
+# Каждая - на отдельной строке
+# LOGIN=test
+# PASSWORD=some_password

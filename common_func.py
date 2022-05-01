@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from pprint import pprint
 import requests
 import logging
+import json 
 import os
 
 
@@ -14,16 +15,17 @@ logging.basicConfig(
     level=logging.INFO
     )
 
-app_id = os.getenv('APPID_EDAMAM')
-tok = os.getenv('TOKEN_EDAMAM')
-
-URL2 = f'https://api.edamam.com/api/recipes/v2?type=public&q=beef%2Cgarlic%2Cpotato&app_id=90dc949b&app_key=8c02c7426db1f97b64cb5f8a86c23c0f&ingr=3-4&imageSize=REGULAR&field=image'
-URL3 = 'https://api.edamam.com/api/recipes/v2?type=public&q=beef%2Cgarlic%2Cpotato&app_id=90dc949b&app_key=8c02c7426db1f97b64cb5f8a86c23c0f&ingr=3-4&imageSize=REGULAR&field=label'
-URL = 'https://www.themealdb.com/api/json/v1/1/random.php'
-
 def get_iam_token():
     # curl -d "{\"yandexPassportOauthToken\":\"<OAuth-token>\"}" "https://iam.api.cloud.yandex.net/iam/v1/tokens"
-    pass
+    url = 'https://iam.api.cloud.yandex.net/iam/v1/tokens'
+    headers = {'Content-Type': 'application/json', 'charset': 'UTF-8'} 
+    data = json.dumps(
+        {"yandexPassportOauthToken": os.getenv('TOKEN_YNX')},
+        indent = 4
+        )
+    iam_token = requests.post(url, data=data, headers=headers)
+
+    return iam_token.json()
 
 def translate(text, lang='ru'):
     body = {
@@ -31,12 +33,10 @@ def translate(text, lang='ru'):
         "texts": text,
         "folderId": os.getenv('FOLDER_ID'),
     }
-
     headers = {
         "Content-Type": "application/json",
-        "Authorization": "Bearer {0}".format(os.getenv('IAM_TOKEN'))
+        "Authorization": f"Bearer {get_iam_token()['iamToken']}"
     }
-
     response = requests.post('https://translate.api.cloud.yandex.net/translate/v2/translate',
         json = body,
         headers = headers
@@ -46,7 +46,9 @@ def translate(text, lang='ru'):
 
 def get_random_recipe():
     try:
-        response = requests.get(URL)
+        response = requests.get(
+            'https://www.themealdb.com/api/json/v1/1/random.php'
+        )
     except Exception as error:
         logging.error(f'Ошибка при запросе к основному API: {error}')
         new_url = 'https://api.thedogapi.com/v1/images/search'
@@ -62,8 +64,27 @@ def get_random_recipe():
 
     return recipe, picture
 
+def get_recipe_from_ingredient(ingredient):
+    try:
+        response = requests.get(
+            f'www.themealdb.com/api/json/v1/1/filter.php?i={ingredient}'
+            )
+    except Exception as error:
+        logging.error(f'Ошибка при запросе к основному API: {error}')
+        new_url = 'https://api.thedogapi.com/v1/images/search'
+        response = requests.get(new_url)
+    
+    #response = response.json().get('meals')[0].get('strInstructions') 
+    #random_cat = response[0].get('url')
+    title = translate(response.json().get('meals')[0].get('strMeal'))
+    picture = response.json().get('meals')[0].get('strMealThumb') 
+    man = translate(response.json().get('meals')[0].get('strInstructions'))
 
+    recipe = f'{title}\n{man}'
 
+    return recipe, picture    
+
+#print(get_iam_token())
 
 #data = get_random_recipe().get('meals')[0].get('strInstructions')
 pprint(get_random_recipe()) # .get('hits')[3].get('recipe'))

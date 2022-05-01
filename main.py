@@ -40,7 +40,7 @@ def wake_up(update, context):
     context.bot.send_message(chat.id, get_random_recipe())
 
 def main():
-    updater = Updater(token=os.getenv('TOKEN'))
+    updater = Updater(token=os.getenv('TOKEN_TELEGA'))
    
     updater.dispatcher.add_handler(CommandHandler('start', wake_up))
     updater.dispatcher.add_handler(CommandHandler('newrecipe', new_recipe))
