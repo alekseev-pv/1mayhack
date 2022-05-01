@@ -14,4 +14,4 @@ if __name__ == '__main__':
     print_hi('Initial 1mayhack')
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
-# первый коммент
+# первый коммент и пуш из пайчарма
