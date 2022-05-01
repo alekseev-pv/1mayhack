@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from telegram import ReplyKeyboardMarkup
 
-from .settings import HOROSCOPE_URL, ZODIAC, daily
+from settings import HOROSCOPE_URL, ZODIAC, daily
 
 load_dotenv()
 
@@ -92,7 +92,7 @@ def callback_minute(context: tg.CallbackContext):
 def main():
     """Основная логика."""
     updater = tg.Updater(token=TELEGRAM_TOKEN, use_context=True)
-    updater.job_queue.run_repeating(callback_minute, interval=60,
+    updater.job_queue.run_repeating(callback_minute, interval=86400,
                                     first=FIRST_MESSAGE)
     updater.dispatcher.add_handler(tg.CommandHandler('start', wake_up))
     updater.dispatcher.add_handler(tg.MessageHandler(tg.Filters.text(ZODIAC),
