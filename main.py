@@ -1,9 +1,10 @@
 import telegram
-from telegram.ext import Updater, CommandHandler, MessageHandler
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from telegram import ReplyKeyboardMarkup
 
 import logging
 import requests
+from pprint import pprint
 
 import os
 from dotenv import load_dotenv
@@ -32,7 +33,21 @@ def get_new_text():
 
 def new_text(update, context):
     chat = update.effective_chat
-    context.bot.send_message(chat.id, get_new_text())
+    print(update.message)
+    text = update.message.text
+    context.bot.send_message(chat.id, f'Был отправлен текст {text}')
+
+def get_new_image():
+    return f'Просто новый текст'
+
+def new_image(update, context):
+    chat = update.effective_chat
+    image = update.message.photo
+    print(update.message.photo)
+    print(type(image))
+    #print(update.message.photo)
+    #context.bot.send_message(chat.id, get_new_image())
+    context.bot.send_message(chat.id, update.message.photo)
 
 
 def wake_up(update, context):
@@ -52,6 +67,8 @@ def main():
 
     updater.dispatcher.add_handler(CommandHandler('start', wake_up))
     updater.dispatcher.add_handler(CommandHandler('newtext', new_text))
+    updater.dispatcher.add_handler(MessageHandler(Filters.text, new_text))
+    updater.dispatcher.add_handler(MessageHandler(Filters.photo, new_image))
     updater.start_polling()
     updater.idle()
 
