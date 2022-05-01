@@ -1,16 +1,69 @@
-# This is a sample Python script.
+import logging
+import os
+import sys
 
-# Press ⌃R to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
+import requests
+import telegram
+from dotenv import load_dotenv
+from http import HTTPStatus
+from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
+from telegram import ReplyKeyboardMarkup
+from params import TIMING, MENU
+
+load_dotenv()
+
+TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
+TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
+updater = Updater(token=TELEGRAM_TOKEN)
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press ⌘F8 to toggle the breakpoint.
+def get_timing(update, context):
+    chat = update.effective_chat
+    for key in TIMING:
+        print(f'{key} - {TIMING[key]}')
+        context.bot.send_message(
+            chat_id=chat.id,
+            text=f'{key} - {TIMING[key]}',
+            # reply_markup=button
+        )
 
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('Initial 1mayhack')
+def start_bot(update, context):
+    chat = update.effective_chat
+    name = update.message.chat.first_name
+    button = ReplyKeyboardMarkup([['Тайминг', 'Место проведения'],
+                                  ['Меню', 'Алкогольное меню']], resize_keyboard=True)
+    context.bot.send_message(
+        chat_id=chat.id,
+        text='Привет! Добро пожаловать в Wedding Bot!',
+        reply_markup=button
+    )
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+
+def get_menu(update, context):
+    chat = update.effective_chat
+    for key in MENU:
+        context.bot.send_message(
+            chat_id=chat.id,
+            text=key,
+        )
+        for i in MENU[key]:
+            context.bot.send_message(
+                chat_id=chat.id,
+                text=i,
+            )
+
+
+def kek():
+    return 'kek'
+
+
+updater.dispatcher.add_handler(CommandHandler('start', start_bot))
+updater.dispatcher.add_handler(MessageHandler(Filters.text('Тайминг'), get_timing))
+updater.dispatcher.add_handler(MessageHandler(Filters.text('Меню'), get_menu))
+updater.start_polling()
+updater.idle()
+
+
+# if __name__ == '__main__':
+#     pass
