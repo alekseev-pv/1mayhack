@@ -1,11 +1,11 @@
 import os
+import pprint as p
 import re
+
 import requests
 import telegram
-from telegram.ext import Updater, Filters, MessageHandler
 from dotenv import load_dotenv
-import pprint as p
-
+from telegram.ext import Filters, MessageHandler, Updater
 
 load_dotenv()
 TG_TOKEN = os.getenv('TG_TOKEN')
