@@ -1,4 +1,6 @@
 /venv/
 .env
 example.py
-test.py
+test.txt
+main_v1.py
+main_v2.py
