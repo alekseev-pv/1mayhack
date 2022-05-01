@@ -18,7 +18,12 @@ TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 URL_YANDEX_IMAGE = 'https://yandex.ru/images/search?source=collections' \
                    '&rpt=imageview&url=urltofile&'
+THUMBSNAP_API_KEY = os.getenv('THUMBSNAP_API_KEY') # https://thumbsnap.com/api
+THUMBSNAP_URL = 'https://thumbsnap.com/api/upload'
+
 COUNT_OUTPUT_IMAGES = 3
+TEST_URL_IMAGE = 'https://teatrzoo.ru/wp-content/uploads/2019/10' \
+                          '/kak-krichat-lebedi_39.jpg'
 
 
 def send_message(bot, message):
@@ -64,17 +69,20 @@ def wake_up(update, context):
     )
 
 
-def get_yandex_inf():
-    url_image = 'https://teatrzoo.ru/wp-content/uploads/2019/10/kak-krichat-lebedi_39.jpg'
+def get_yandex_inf(url_image):
     url = f'https://yandex.ru/images/search?source=collections&rpt=imageview' \
           f'&url={url_image}'
     soup = BeautifulSoup(requests.get(url).text, 'lxml')
     similar = soup.find_all('div', class_='CbirSimilar-Thumb')
+    all_string = []
 
     for i in similar:
         str_ish = f"{i.find('a').get('href')}\n"
         str_edit = change_str_to_url(str_ish)
-        print(str_edit)
+        all_string.append(str_edit)
+        # print(str_edit)
+    #pprint(all_string)
+    return all_string
 
 
 def change_str_to_url(string: str):
@@ -82,11 +90,11 @@ def change_str_to_url(string: str):
     new_string = string[:end_index]
     begin_index = new_string.find('img_url') + 8
     newest_string = new_string[begin_index:]
-
     parsed_string = urllib.parse.unquote_plus(newest_string)
     return parsed_string
 
-
+def push_image_web():
+    pass
 
 def main():
     updater = Updater(token=TELEGRAM_TOKEN)
@@ -101,5 +109,5 @@ def main():
 
 
 if __name__ == '__main__':
-    # main()
-    get_yandex_inf()
+    #main()
+    get_yandex_inf(TEST_URL_IMAGE)
