@@ -3,6 +3,7 @@ from time import sleep
 
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
+from fake_useragent import UserAgent
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from telegram import ReplyKeyboardMarkup
@@ -13,27 +14,31 @@ load_dotenv()
 tg_token = os.getenv('TOKEN')
 
 
-DATABASE = []
-
-
-def get_input_and_formation_url(user_input):
-    DATABASE.append(user_input)
-    number_auto = user_input[0]
+def get_input_and_formation_url(data):
+    with open('DATABASE.txt', 'a') as file:
+        file.write(str(data))
+    number_auto = data[0].lower()
     num, region = number_auto[:6], number_auto[6:]
-    sts = user_input[1]
-    return get_data_from_brouser(f'https://гибдд.рф/check/fines#{num}+{region}+{sts}')
+    sts = data[1]
+    return get_data_from_brouser(
+        f'https://гибдд.рф/check/fines#{num}+{region}+{sts}')
 
 
 def get_data_from_brouser(url):
     options = webdriver.ChromeOptions()
-    options.add_argument('--headless')
+    ua = UserAgent()
+    userAgent = ua.random
+    options.add_argument(f'user-agent={userAgent}')
+    options.add_argument(
+        '--headless'
+                         )  # закомментить для отображения действий в браузере
     browser = webdriver.Chrome("chromedriver.exe", options=options)
     browser.get(url)
-    sleep(3)
+    sleep(10)  # Для надежности можно поставить 15
     button = browser.find_element(by=By.XPATH,
                                   value='//*[@id="checkFines"]/p[4]/a')
     button.click()
-    sleep(3)
+    sleep(5)
     HTML = browser.page_source
     browser.close()
     soup = BeautifulSoup(HTML, 'html.parser')
@@ -55,7 +60,8 @@ def user_input(update, context):
     name = update.message.chat.first_name
     context.bot.send_message(
         chat_id=chat.id,
-        text=(f'Оке, приступим {name} введи номер авто и номер СТС с отступом 1 пробел, '
+        text=(f'Оке, приступим {name} введи номер авто и '
+              f'номер СТС с отступом 1 пробел, '
               f'например: а777аа777 99аа999999')
     )
 
@@ -63,7 +69,10 @@ def user_input(update, context):
 def show_fines(update, context):
     chat = update.effective_chat
     name = update.message.chat.first_name
-    context.bot.send_message(chat_id=chat.id, text=f'Минутку {name}, проверяю информацию...')
+    context.bot.send_message(
+        chat_id=chat.id,
+        text=f'Минутку {name}, проверяю информацию...'
+    )
     user_input = update.message.text.split()
     if len(user_input) == 2:
         result = get_input_and_formation_url(user_input)
@@ -77,7 +86,7 @@ def start(update, context):
 
     context.bot.send_message(
         chat_id=chat.id,
-        text=f'Привет, {name}. хочешь проверить твои штрафы?',
+        text=f'Привет, {name}. хочешь проверить твои автомобильные штрафы?',
         reply_markup=button
     )
 
