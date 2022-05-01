@@ -1,3 +1,4 @@
+import codecs
 import requests
 import os
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
@@ -195,12 +196,22 @@ def talk(update, context):
                              text='Нет времени на разговоры! Хватай карты!')
 
 
+def rules(update, context):
+    chat = update.effective_chat
+    text = codecs.open("rules.txt", "r", "utf_8_sig")
+    text = text.readlines()
+    button = ReplyKeyboardMarkup([['/start', '/rules']], resize_keyboard=True)
+    for str in text:
+        context.bot.send_message(chat_id=chat.id, text=str, reply_markup=button)
+                        
+
 def main():
     updater = Updater(token=auth_token)
 
     updater.dispatcher.add_handler(CommandHandler('draw', lets_play))
     updater.dispatcher.add_handler(CommandHandler('start', wellcome))
     updater.dispatcher.add_handler(CommandHandler('stop', bot_plays))
+    updater.dispatcher.add_handler(CommandHandler('rules', rules))
     updater.dispatcher.add_handler(MessageHandler(Filters.text, talk))
 
     updater.start_polling()
