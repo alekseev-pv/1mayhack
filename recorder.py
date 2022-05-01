@@ -1,8 +1,9 @@
 import os
+
 import speech_recognition as sr
 import telebot
-from telebot import types
 from dotenv import load_dotenv
+from telebot import types
 
 recorder = sr.Recognizer()
 
