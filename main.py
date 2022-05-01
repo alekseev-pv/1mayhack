@@ -27,14 +27,43 @@ DICT = {
     'KING': 10,
 }
 
-# задаем глобальные переменные, используемые в функциях
-total = 0
-total_aces = 0
-bot_total_aces = 0
-player_wins = 0
-bot_wins = 0
-bot_total = 0
-bot_first_card_value = 0
+user_dict = {
+    215680037: {
+        'total': 0,
+        'total_aces':  0,
+        'bot_total_aces': 0,
+        'player_wins': 0,
+        'bot_wins': 0,
+        'bot_total': 0,
+        'bot_first_card_value': 0,
+    }
+}
+
+
+def read_user_dict(user_dict, chat_id, key):
+    """Берем локальную переменную из словаря."""
+    value = user_dict[chat_id][key]
+    return value
+
+
+def write_user_dict(user_dict, chat_id, key, value):
+    """Записываем локальную переменную в словарь."""
+    user_dict[chat_id][key] = value
+
+
+def check_or_create_user(user_dict, chat_id):
+    """Проверяем существует ли пользователь
+    и в случае отсутствия создаем нового."""
+    if chat_id not in user_dict:
+        user_dict[chat_id] = {
+            'total': 0,
+            'total_aces':  0,
+            'bot_total_aces': 0,
+            'player_wins': 0,
+            'bot_wins': 0,
+            'bot_total': 0,
+            'bot_first_card_value': 0,
+        }
 
 
 def draw_a_card():
@@ -46,9 +75,16 @@ def draw_a_card():
 
 def bot_plays(update, context):
     """Ход бота, а также подсчет результатов"""
-    global total, player_wins, bot_wins
-    global bot_total_aces, bot_total, bot_first_card_value
+    global bot_total, bot_first_card_value
     chat = update.effective_chat
+
+    total = read_user_dict(user_dict=user_dict, chat_id=chat.id, key='total')
+    bot_wins = read_user_dict(user_dict=user_dict, chat_id=chat.id, key='bot_wins')
+    player_wins = read_user_dict(user_dict=user_dict, chat_id=chat.id, key='player_wins')
+    bot_first_card_value = read_user_dict(user_dict=user_dict, chat_id=chat.id, key='bot_first_card_value')
+    bot_total = 0
+    bot_total_aces = 0
+
     check_win = False
     button = ReplyKeyboardMarkup([['/start', '/rules']], resize_keyboard=True)
     context.bot.send_message(chat_id=chat.id,
@@ -114,15 +150,25 @@ def bot_plays(update, context):
             context.bot.send_message(chat_id=chat.id,
                                      text=f'Вы - {player_wins}. Бот - {bot_wins}.',
                                      reply_markup=button)
+    write_user_dict(user_dict=user_dict,
+                    chat_id=chat.id,
+                    key='bot_wins',
+                    value=bot_wins)
+    write_user_dict(user_dict=user_dict,
+                    chat_id=chat.id,
+                    key='player_wins',
+                    value=player_wins)
 
 
 def wellcome(update, context):
     """Запуск игры, взятие первой карты ботом."""
-    global total, bot_total, bot_first_card_value, total_aces, bot_total_aces
-    total = 0
-    total_aces = 0
-    bot_total = 0
+    global user_dict
     chat = update.effective_chat
+    check_or_create_user(user_dict=user_dict, chat_id=chat.id)
+    write_user_dict(user_dict, chat.id, 'total', 0)
+    write_user_dict(user_dict, chat.id, 'total_aces', 0)
+    write_user_dict(user_dict, chat.id, 'bot_total', 0)
+    bot_total_aces = 0
     name = update.message.chat.first_name
     button = ReplyKeyboardMarkup([['/draw', '/rules']], resize_keyboard=True)
     card = draw_a_card()
@@ -140,13 +186,24 @@ def wellcome(update, context):
         bot_first_card_value = DICT[card['value']]
     context.bot.send_message(chat_id=chat.id,
                              text=f'И так, у меня {bot_first_card_value}. Твой черед!')
+    write_user_dict(user_dict=user_dict,
+                    chat_id=chat.id,
+                    key='bot_first_card_value',
+                    value=bot_first_card_value)
+    write_user_dict(user_dict=user_dict,
+                    chat_id=chat.id,
+                    key='bot_total_aces',
+                    value=bot_total_aces)
 
 
 def lets_play(update, context):
     """Взятие карты игроком."""
-    global total, total_aces, player_wins, bot_wins
     chat = update.effective_chat
     button = ReplyKeyboardMarkup([['/start', '/rules']], resize_keyboard=True)
+    total = read_user_dict(user_dict=user_dict, chat_id=chat.id, key='total')
+    total_aces = read_user_dict(user_dict=user_dict, chat_id=chat.id, key='total_aces')
+    bot_wins = read_user_dict(user_dict=user_dict, chat_id=chat.id, key='bot_wins')
+    player_wins = read_user_dict(user_dict=user_dict, chat_id=chat.id, key='player_wins')
     card = draw_a_card()
     card_pic = card['image']
     context.bot.send_photo(chat.id, card_pic)
@@ -189,14 +246,33 @@ def lets_play(update, context):
                                  text=f'Общее число очков: {total}',
                                  reply_markup=button)
 
+    write_user_dict(user_dict=user_dict,
+                    chat_id=chat.id,
+                    key='total',
+                    value=total)
+    write_user_dict(user_dict=user_dict,
+                    chat_id=chat.id,
+                    key='total_aces',
+                    value=total_aces)
+    write_user_dict(user_dict=user_dict,
+                    chat_id=chat.id,
+                    key='bot_wins',
+                    value=bot_wins)
+    write_user_dict(user_dict=user_dict,
+                    chat_id=chat.id,
+                    key='player_wins',
+                    value=player_wins)
+
 
 def talk(update, context):
+    """Реакция на разговоры."""
     chat = update.effective_chat
     context.bot.send_message(chat_id=chat.id,
                              text='Нет времени на разговоры! Хватай карты!')
 
 
 def rules(update, context):
+    """Показываем правила."""
     chat = update.effective_chat
     text = codecs.open("rules.txt", "r", "utf_8_sig")
     text = text.readlines()
