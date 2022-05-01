@@ -33,7 +33,7 @@ def get_new_text():
 
 def new_text(update, context):
     chat = update.effective_chat
-    print(update.message)
+    #print(update.message)
     text = update.message.text
     context.bot.send_message(chat.id, f'Был отправлен текст {text}')
 
@@ -42,12 +42,10 @@ def get_new_image():
 
 def new_image(update, context):
     chat = update.effective_chat
-    image = update.message.photo
-    print(update.message.photo)
-    print(type(image))
-    #print(update.message.photo)
-    #context.bot.send_message(chat.id, get_new_image())
-    context.bot.send_message(chat.id, update.message.photo)
+    image = update.message.photo[0]
+    context.bot.send_message(chat.id, 'Возвращаем вам ваше изображение')
+    context.bot.send_photo(chat.id, image)
+
 
 
 def wake_up(update, context):
