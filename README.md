@@ -43,6 +43,9 @@ https://netology.ru/blog/bots-45 - подборка идей 1
 
 https://vc.ru/services/268236-bolshaya-podborka-poleznyh-telegram-botov - подборка идей 2
 
+Имя бота: BreakingBadFunQuotBot
+Имя пользователя: @BBFun_Bot
+
 
 
 
